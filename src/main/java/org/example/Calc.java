@@ -1,174 +1,178 @@
 package org.example;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 public class Calc {
 
     public static int run(String exp) {
 
+        // 괄호 제거
+        exp = stripOuterBrackets(exp);
 
-        boolean needToPlus = exp.contains("+");
-        boolean needToMinus = exp.contains("-");
+        // 단일항이 들어오면 바로 리턴
+        if (!exp.contains(" ")) {
+            return Integer.parseInt(exp);
+        }
+
+        boolean needToMulti = exp.contains(" * ");
+        boolean needToPlus = exp.contains(" + ") || exp.contains(" - ");
+
+        boolean needToCompound = needToPlus && needToMulti;
+
+        if (needToCompound) {
+            exp = stripOuterBrackets(exp);
+            String[] bits = exp.split(" \\+ ");
+
+            String newExp = Arrays.stream(bits)
+                    .mapToInt(Calc::run)
+                    .mapToObj(e -> e + "")
+                    .collect(Collectors.joining(" + "));
+
+            return run(newExp);
+        }
+
+        if (needToPlus) {
+
+            System.out.println("exp1 : " + exp);
 
 
-        System.out.println("exp1 : " + exp);
+            exp = exp.replace("- ", "+ -");
 
 
-        exp = exp.replace("- ", "+ -");
 
 
-        String[] bits = exp.split(" \\+ ");
+            String[] bits = exp.split(" \\+ ");
 
-        System.out.println("exp2 : " + exp);
+            int sum = 0;
 
+            for (int i = 0; i < bits.length; i++) {
+                sum += Integer.parseInt(bits[i]);
+            }    return sum;
+        } else if (needToMulti) {
+            String[] bits = exp.split(" \\* ");
 
-        int sum = 0;
+            int sum = 1;
 
-        for(int i = 0; i < bits.length; i++) {
-            sum+= Integer.parseInt(bits[i]);
-        }return sum;
+            for (int i = 0; i < bits.length; i++) {
+                sum *= Integer.parseInt(bits[i]);
+            }
+
+            return sum;
+        }
+
+        throw new RuntimeException("해석 불가 : 올바른 계산식이 아닙니다");
+
     }
+
+    private static String stripOuterBrackets(String exp) {
+
+
+        int outerBracketsCount = 0;
+
+        while (exp.charAt(outerBracketsCount) == '(' && exp.charAt(exp.length() - 1 - outerBracketsCount) == ')') {
+            outerBracketsCount++;
+        }
+
+        if (outerBracketsCount == 0) return exp;
+
+        return exp.substring(outerBracketsCount, exp.length() - outerBracketsCount);
+    }
+
 }
 
-
-// =====더하기
-//String[] bits = exp.split(" \\+ ");
+// ======================= 더하기 곱하기 연산
+//        boolean needToMulti = exp.contains("*");
+//        boolean needToPlus = exp.contains("+");
 //
-//int a = Integer.parseInt(bits[0]);
-//int b = Integer.parseInt(bits[1]);
-//
-//        return a + b;
+//        boolean needToCompound = needToPlus && needToMulti;
 
 
-//======더하기 빼기 추가
+//
+//        if (needToCompound) {
+//            String[] bits = exp.split(" \\+ ");
+//
+//
+//            String newExp = "";
+//                        for (int i = 0; i < bits.length; i++) {
+//                            int result = Calc.run(bits[i]);
+//                            newExp += result;
+//                            if (i < bits.length - 1) {
+//                                newExp += " + ";
+//                            }
+//                        }
+//
+//
+//                         return run(newExp);
 
-//boolean needToPlus = exp.contains("+");
-//boolean needToMinus = exp.contains("-");
-//
-//String[] bits = null;
-//
-//        if (needToPlus) {
-//bits = exp.split(" \\+ ");
-//        } else if (needToMinus) {
-//bits = exp.split(" - ");
+
+//====================replace를 이용한 괄호제거
+
+//      if (!exp.contains(" ")) { //단일항이 들어오면 바로 리턴
+//        return Integer.parseInt(exp);
 //        }
 //
-//int a = Integer.parseInt(bits[0]);
-//int b = Integer.parseInt(bits[1]);
+//boolean needToMulti = exp.contains("*");
+//boolean needToPlus = exp.contains("+"); // -음수 추가 || exp.contains("-");
 //
-//        if (needToPlus) {
-//        return a + b;
-//        } else if (needToMinus) {
-//        return a - b;
-//        }
+//boolean needToCompound = needToPlus && needToMulti;
+//boolean needToMinus =! (needToPlus || needToMulti);// 내가한거.
 //
-//                throw new RuntimeException("해석 불가 : 올바른 계산식이 아닙니다");
-
-//======3개 더하기
-
-//boolean needToPlus = exp.contains("+");
-//boolean needToMinus = exp.contains("-");
-//
-//String[] bits = null;
-//
-//        if (needToPlus) {
-//bits = exp.split(" \\+ ");
-//        } else if (needToMinus) {
-//bits = exp.split(" - ");
-//        }
-//
-//int a = Integer.parseInt(bits[0]);
-//int b = Integer.parseInt(bits[1]);
-//int c = 0;
-// if(bits.length >2){
-//        int c = Integer.parseInt(bits[2]);}
-//        if (needToPlus) {
-//        return a + b + c;
-//        } else if (needToMinus) {
-//        return a - b;
-//        }
-//
-//                throw new RuntimeException("해석 불가 : 올바른 계산식이 아닙니다");
-
-// ======= 더하기 빼기 연산
-
-//boolean needToPlus = exp.contains("+");
-//boolean needToMinus = exp.contains("-");
-//        System.out.println("exp1 : " + exp);
-//
-//String[] bits = null;
-//exp = exp.replace("- ", "+ -");
-//        if (needToPlus) {
-//bits = exp.split(" \\+ ");
-//        } else if (needToMinus) {
-//bits = exp.split(" - ");
-//        }
-//
-//                System.out.println("exp2 : " + exp);
-//
-//
-//int a = Integer.parseInt(bits[0]);
-//int b = Integer.parseInt(bits[1]);
-//int c = 0;
-// if(bits.length >2){
-//c = Integer.parseInt(bits[2]);}
-//        if (needToPlus) {
-//        return a + b + c;
-//        } else if (needToMinus) {
-//        return a - b;
-//        } return a + b + c;
-
-//   throw new RuntimeException("해석 불가 : 올바른 계산식이 아닙니다");
-
-
-//=======임시 방편
-//boolean needToPlus = exp.contains("+");
-//boolean needToMinus = exp.contains("-");
-//
-//
-//        System.out.println("exp1 : " + exp);
-//
-//
-//exp = exp.replace("- ", "+ -");
-//
-//
-//String[] bits = exp.split(" \\+ ");
-//
-//        System.out.println("exp2 : " + exp);
-//
-//
-//int a = Integer.parseInt(bits[0]);
-//int b = Integer.parseInt(bits[1]);
-//int c = 0;
-//        if (bits.length > 2) {
-//c = Integer.parseInt(bits[2]);
-//        }
-//                if (needToPlus) {
-//        return a + b + c;
-//        } else if (needToMinus) {
-//        return a + b;
-//        }return 0;
-
-
-// === 덧셈 뻴셈 최적화
-
-//boolean needToPlus = exp.contains("+");
-//boolean needToMinus = exp.contains("-");
-//
-//
-//        System.out.println("exp1 : " + exp);
-//
-//
-//exp = exp.replace("- ", "+ -");
-//
-//
-//String[] bits = exp.split(" \\+ ");
-//
-//        System.out.println("exp2 : " + exp);
-//
-//
-//int sum = 0;
-//
-//        for(int i = 0; i < bits.length; i++) {
-//sum+= Integer.parseInt(bits[i]);
-//        }return sum;
+//        if (needToMinus) {
+//String[] bits = exp.split( " - ");
+//            return Integer.parseInt(bits[0]) - Integer.parseInt(bits[1]);
 //    }
+//            if (needToCompound) {
+//exp = exp.replace("(" , "");
+//exp = exp.replace(")" , "");
+//String[] bits = exp.split(" \\+ ");
+//
+//
+//
+//            if (bits.length == 2) {
+//        return Integer.parseInt(bits[0]) + run(bits[1]);
 //            }
+//                    if (bits.length == 3) {
+//        return run(bits[0]) + Integer.parseInt(bits[1]) + run(bits[2]);
+//            }
+//
+//
+//                    return Integer.parseInt(bits[0]) + run(bits[1]);
+
+//        }
+
+
+// 강사님이 알려준 괄호제거
+// 괄호 제거
+//exp = stripOuterBrackets(exp);
+//
+//// 단일항이 들어오면 바로 리턴
+//        if (!exp.contains(" ")) {
+//        return Integer.parseInt(exp);
+//        }
+//
+//boolean needToMulti = exp.contains(" * ");
+//boolean needToPlus = exp.contains(" + ") || exp.contains(" - ");
+//
+//boolean needToCompound = needToPlus && needToMulti;
+//
+//        if (needToCompound) {
+//exp = stripOuterBrackets(exp);
+//String[] bits = exp.split(" \\+ ");
+//
+//String newExp = Arrays.stream(bits)
+//        .mapToInt(Calc::run)
+//        .mapToObj(e -> e + "")
+//        .collect(Collectors.joining(" + "));
+//
+//            return run(newExp);
+//        }
+//
+
+// 아래는 맨밑에 더하기 곱하기 밑에
+//private static String stripOuterBrackets(String exp) {
+//
+//    if (exp.charAt(0) == '(' && exp.charAt(exp.length() - 1) == ')') {
+//        exp = exp.substring(1, exp.length() - 1);
+//    }
+//
+//    return exp;
